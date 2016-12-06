@@ -1,0 +1,27 @@
+ubuntu linux RabbitMQ安装
+
+APT
+1、echo 'deb http://www.rabbitmq.com/debian/ testing main' |
+        sudo tee /etc/apt/sources.list.d/rabbitmq.list
+		
+2、wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc |
+        sudo apt-key add -
+
+3、sudo apt-get update
+
+4、sudo apt-get install rabbitmq-server
+
+关于RabbitMQ的图形管理界面（默认无法使用）：
+1、安装 RabbitMQWeb管理插件
+   rabbitmq-plugins enable rabbitmq_management
+2、重启服务
+   service rabbitmq-server restart
+   
+3、登录
+    访问：http://127.0.0.1:15672    uname:guest    pwd:guest      port :156
+    但是由于我是使用的虚拟机桥接的方式，在访问MQ的web界面时相当于局域网连接（我虚拟机的ip为192.168.52.xx）,
+    我在使用局域网访问管理界面时发现一直提示“login failed”,查了下才知道是高版本的mq在作怪，在3.x版本后的
+    mq中默认只有localhost能登录，so，what should I do ? （有人说关闭防火墙[ufw disable]后就可以连接，
+    我试了试，还是不行）。终于，换了很多方法，终于可以了。
+    需要编写/etc/rabbitmq/rabbitmq.config文件（此文件是手动新建的），添加如下内容：
+    [{rabbit, [{loopback_users, []}]}].重启，OK！测试了一把，看到弯弯曲曲的线条，我就放心了。打完，收工！

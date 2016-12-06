@@ -1,0 +1,16 @@
+
+查看tomcat运行日志
+
+tail -f catalina.out
+
+通过关键字搜索查看日志
+
+cat jeewx-2015-09-20.log | grep 验证码
+
+查看固定时间日志
+
+cat jeewx-2015-09-20.log | grep '2015-09-20 18:50:15'
+
+查看最近50行日志
+
+tail -n 50 -f catalina.out

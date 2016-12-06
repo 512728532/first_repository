@@ -1,0 +1,115 @@
+在JAVA程序中，性能问题的大部分原因并不在于JAVA语言，而是程序本身。养成良好的编码习惯非常重要，能够显著地提升程序性能。 
+
+1. 尽量使用final修饰符。 
+带有final修饰符的类是不可派生的。在JAVA核心API中，有许多应用final的例子，例如 java.lang.String。为String类指定final防止了使用者覆盖length()方法。另外，如果一个类是final的，则该类所有方法都是final的。java编译器会寻找机会内联（inline）所有的final方法（这和具体的编译器实现有关）。此举能够使性能平均提高 50%。 
+
+2.尽量重用对象。 
+特别是String对象的使用中，出现字符串连接情况时应使用StringBuffer代替，由于系统不仅要花时间生成对象，以后可能还需要花时间对这些对象进行垃圾回收和处理。因此生成过多的对象将会给程序的性能带来很大的影响。 
+
+3. 尽量使用局部变量。 
+调用方法时传递的参数以及在调用中创建的临时变量都保存在栈（Stack）中，速度较快。其他变量，如静态变量，实例变量等，都在堆（Heap）中创建，速度较慢。 
+
+4.不要重复初始化变量。 
+默认情况下，调用类的构造函数时，java会把变量初始化成确定的值，所有的对象被设置成null，整数变量设置成0，float和double变量设置成0.0，逻辑值设置成false。当一个类从另一个类派生时，这一点尤其应该注意，因为用new关键字创建一个对象时，构造函数链中的所有构造函数都会被自动调用。 
+这里有个注意，给成员变量设置初始值但需要调用其他方法的时候，最好放在一个方法比如initXXX()中，因为直接调用某方法赋值可能会因为类尚未初始化而抛空指针异常，public int state = this.getState(); 
+
+5.在java+Oracle的应用系统开发中，java中内嵌的SQL语言应尽量使用大写形式，以减少Oracle解析器的解析负担。 
+
+6.java编程过程中，进行数据库连接，I/O流操作，在使用完毕后，及时关闭以释放资源。因为对这些大对象的操作会造成系统大的开销。 
+
+7.过分的创建对象会消耗系统的大量内存，严重时，会导致内存泄漏，因此，保证过期的对象的及时回收具有重要意义。 
+JVM的GC并非十分智能，因此建议在对象使用完毕后，手动设置成null。 
+
+8.在使用同步机制时，应尽量使用方法同步代替代码块同步。 
+
+9.尽量减少对变量的重复计算。 
+比如 
+for(int i=0;i<list.size();i++) 
+
+应修改为 
+for(int i=0,len=list.size();i<len;i++)
+
+
+10. 采用在需要的时候才开始创建的策略。 
+例如： 
+String str="abc";
+if(i==1){ list.add(str);}
+
+应修改为： 
+if(i==1){String str="abc"; list.add(str);}
+
+
+11.慎用异常，异常对性能不利。 
+抛出异常首先要创建一个新的对象。Throwable接口的构造函数调用名为fillInStackTrace()的本地方法，fillInStackTrace()方法检查栈，收集调用跟踪信息。只要有异常被抛出，VM就必须调整调用栈，因为在处理过程中创建了一个新的对象。 
+异常只能用于错误处理，不应该用来控制程序流程。 
+
+12.不要在循环中使用Try/Catch语句，应把Try/Catch放在循环最外层。 
+Error是获取系统错误的类，或者说是虚拟机错误的类。不是所有的错误Exception都能获取到的，虚拟机报错 Exception就获取不到，必须用Error获取。 
+
+13.通过StringBuffer的构造函数来设定他的初始化容量，可以明显提升性能。 
+StringBuffer的默认容量为16，当StringBuffer的容量达到最大容量时，她会将自身容量增加到当前的2倍+2，也就是2*n+2。无论何时，只要StringBuffer到达她的最大容量，她就不得不创建一个新的对象数组，然后复制旧的对象数组，这会浪费很多时间。所以给StringBuffer设置一个合理的初始化容量值，是很有必要的！ 
+
+14.合理使用java.util.Vector。 
+Vector 与StringBuffer类似，每次扩展容量时，所有现有元素都要赋值到新的存储空间中。Vector的默认存储能力为10个元素，扩容加倍。 
+vector.add(index,obj) 这个方法可以将元素obj插入到index位置，但index以及之后的元素依次都要向下移动一个位置（将其索引加 1）。 除非必要，否则对性能不利。 
+同样规则适用于remove(int index)方法，移除此向量中指定位置的元素。将所有后续元素左移（将其索引减 1）。返回此向量中移除的元素。所以删除vector最后一个元素要比删除第1个元素开销低很多。删除所有元素最好用 removeAllElements()方法。 
+如果要删除vector里的一个元素可以使用 vector.remove(obj)；而不必自己检索元素位置，再删除，如int index = indexOf（obj）;vector.remove(index)； 
+
+15.当复制大量数据时，使用 System.arraycopy(); 
+
+16.代码重构，增加代码的可读性。 
+
+17.不用new关键字创建对象的实例。 
+用 new关键词创建类的实例时，构造函数链中的所有构造函数都会被自动调用。但如果一个对象实现了Cloneable接口，我们可以调用她的clone() 方法。clone()方法不会调用任何类构造函数。 
+下面是Factory模式的一个典型实现。 
+public static Credit getNewCredit()
+{
+    return new Credit();
+}
+
+改进后的代码使用clone() 方法， 
+private static Credit BaseCredit = new Credit();
+public static Credit getNewCredit()
+{
+    return (Credit)BaseCredit.clone();
+}
+
+18. 乘除法如果可以使用位移，应尽量使用位移，但最好加上注释，因为位移操作不直观，难于理解。 
+
+19.不要将数组声明为：public static final。 
+
+20.HaspMap的遍历。 
+Map<String, String[]> paraMap = new HashMap<String, String[]>();
+for( Entry<String, String[]> entry : paraMap.entrySet() )
+{
+    String appFieldDefId = entry.getKey();
+    String[] values = entry.getValue();
+}
+
+利用散列值取出相应的Entry做比较得到结果，取得entry的值之后直接取key和 value。 
+
+21.array(数组)和ArrayList的使用。 
+array 数组效率最高，但容量固定，无法动态改变，ArrayList容量可以动态增长，但牺牲了效率。 
+
+22.单线程应尽量使用 HashMap, ArrayList,除非必要，否则不推荐使用HashTable,Vector，她们使用了同步机制，而降低了性能。 
+
+23.StringBuffer,StringBuilder 的区别在于：java.lang.StringBuffer 线程安全的可变字符序列。一个类似于String的字符串缓冲区，但不能修改。StringBuilder与该类相比，通常应该优先使用 StringBuilder类，因为她支持所有相同的操作，但由于她不执行同步，所以速度更快。为了获得更好的性能，在构造StringBuffer或 StringBuilder时应尽量指定她的容量。当然如果不超过16个字符时就不用了。 
+相同情况下，使用StringBuilder比使用 StringBuffer仅能获得10%~15%的性能提升，但却要冒多线程不安全的风险。综合考虑还是建议使用StringBuffer。 
+
+24. 尽量使用基本数据类型代替对象。 
+
+25.用简单的数值计算代替复杂的函数计算，比如查表方式解决三角函数问题。 
+
+26.使用具体类比使用接口效率高，但结构弹性降低了，但现代IDE都可以解决这个问题。 
+
+27.考虑使用静态方法， 
+如果你没有必要去访问对象的外部，那么就使你的方法成为静态方法。她会被更快地调用，因为她不需要一个虚拟函数导向表。这同事也是一个很好的实践，因为她告诉你如何区分方法的性质，调用这个方法不会改变对象的状态。 
+
+28.应尽可能避免使用内在的GET,SET方法。 
+android编程中，虚方法的调用会产生很多代价，比实例属性查询的代价还要多。我们应该在外包调用的时候才使用get，set方法，但在内部调用的时候，应该直接调用。 
+
+29. 避免枚举，浮点数的使用。 
+
+30.二维数组比一维数组占用更多的内存空间，大概是10倍计算。 
+
+31.SQLite数据库读取整张表的全部数据很快，但有条件的查询就要耗时30-50MS,大家做这方面的时候要注意，尽量少用，尤其是嵌套查找！ 

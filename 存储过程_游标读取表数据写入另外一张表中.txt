@@ -1,0 +1,50 @@
+create TABLE
+a (
+id varchar(32),
+names varchar(200)
+);
+
+INSERT INTO a VALUES('1','a,b,c');
+INSERT INTO a VALUES('2','aa,bb,cc');
+
+create table 
+b (
+id varchar(32),
+name varchar(200)
+);
+
+
+CREATE PROCEDURE ab()
+BEGIN
+
+DECLARE Done INT DEFAULT 0;
+DECLARE rowIndex int DEFAULT 0;
+DECLARE purchaseOrderId VARCHAR(32) DEFAULT '';
+DECLARE sellNos VARCHAR(5000);
+DECLARE sellNo VARCHAR(32) DEFAULT '';
+
+/*声明游标*/
+DECLARE pos CURSOR FOR SELECT po.id, po.names FROM a po;
+
+/*异常处理*/
+DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = 1;
+
+/*打开游标*/
+OPEN pos;
+
+FETCH NEXT FROM pos INTO purchaseOrderId, sellNos;
+
+/* 遍历数据表 */
+REPEAT
+	IF NOT done THEN
+		INSERT INTO b VALUE(purchaseOrderId,sellNos);
+
+	END IF;
+FETCH NEXT FROM pos INTO purchaseOrderId, sellNos;
+
+UNTIL done END REPEAT;
+
+/* 关闭游标 */
+CLOSE pos;
+
+END;

@@ -1,0 +1,49 @@
+获取Redis
+1、通过官网http://redis.io/获取稳定版源码包下载地址；
+2、通过wget http://download.redis.io/releases/redis-3.0.2.tar.gz下载 源码包；
+
+编译安装Redis
+1、解压源码安装包，通过tar -xvf redis-3.0.2.tar.gz解压源码，速度相当快；
+2、进入解压后的目录，执行make编译源码；
+make命令执行完成后，会在src目录下生成6个可执行文件，分别是redis-server、redis-cli、redis-benchmark、
+redis-check-aof、redis-check-dump、redis-sentinel。
+3、执行make install安装，或者通过make PREFIX=/usr/local/redis install指定安装目录。
+这里默认安装，默认将之前生成的可执行文件拷贝到/usr/local/bin目录下；
+
+修改配置文件
+1、将源码目录下redis配置文件redis.conf拷贝到/etc/redis目录下。
+2、修改配置项，根据需要；如果不修改，使用默认配置也可以；（port端口，logfile日志路径，dir路径修改）
+
+启动服务：
+查看端口是否被占用：netstat –ntlp |grep 6379  
+方式一：通过命令redis-server 启动，可在命令后加上`&`号使redis以后台程序方式运行；
+方式二：通过指定配置文件启动；redis-server /etc/redis/redis.conf
+默认安装的路径已经加入环境变量中，可直接在命令行执行命令；
+
+命令客户端检测链接
+1、连接之前可以先检测服务是否启动；
+2、测试启动 redis-cli ping 返回PONG，启动成功。
+
+停止Redis：
+关闭服务
+redis-cli shutdown
+如果非默认端口，可指定端口:
+redis-cli -p 6380 shutdown
+
+简单操作：
+1、两种连接方式：
+1：window DOS方式：tentel主机IP端口号(默认为127.0.0.1:6379)
+2：linux客户端方式：redis-cli 主机IP 端口号(默认为127.0.0.1 6379)
+2、命令行操作：
+#redis-cli
+redis 127.0.0.1:6379> set name clj
+OK
+redis 127.0.0.1:6379> get name
+"clj"
+
+设置密码
+# requirepass foobared去掉注释，foobared改为自己的密码，我在这里改为
+requirepass 123456
+测试连接：./redis-cli -h 115.28.240.103 -p 6379 
+输入命令 会提示(error) NOAUTH Authentication required. 这是属于正常现象。
+我们输入 auth  123456#你刚才设置的密码 
