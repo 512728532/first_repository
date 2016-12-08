@@ -1,0 +1,33 @@
+120.76.150.176
+120.76.150.176 cas.ffzx.com
+120.76.150.176 base-data.ffzx.com
+120.76.150.176 pms.ffzx.com
+120.76.150.176 image.ffzx.com
+120.24.217.16 app-server.ffzx.com
+120.24.217.16 app-client.ffzx.com
+120.24.217.16 prms.ffzx.com
+120.24.217.16 wms.ffzx.com
+120.24.217.16 uc.ffzx.com
+120.25.98.201 purms.ffzx.com
+120.25.98.201 cims.ffzx.com
+120.25.98.201 order.ffzx.com
+
+
+
+
+120.24.217.16 
+用户名ffzx
+密码1qa@2ws@3ed
+
+120.25.98.201
+ffzx    1qaz@2wsx#3edc
+tomcat 路径 /mnt/henan
+mq日志 purms-jsw/bin/linux-x86-64 cat wrapper.log |grep 469501561645390 --color -C100(搜索内容行信息，关键字标红， 上线一百行信息)
+
+
+
+120.76.150.176
+ffzx   1qa@2ws#3ed
+
+正式环境
+120.76.31.213  ffzxred/ffzxred2015
