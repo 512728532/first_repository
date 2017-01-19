@@ -1,0 +1,156 @@
+package com.ffzx.purchase.mapper;
+
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.junit.Test;
+
+import com.ffzx.commerce.framework.utils.DateUtil;
+import com.ffzx.commerce.framework.utils.StringUtil;
+import com.ffzx.purchase.TestBase;
+import com.ffzx.purchase.api.service.PurchaseSkuWarningApiService;
+import com.ffzx.purchase.model.PurchaseWarningBean;
+import com.ffzx.purchase.model.StockDifferenceReplenish;
+import com.ffzx.purchase.service.PurchaseSkuWarningService;
+import com.ffzx.purchase.service.StockDifferenceReplenishService;
+import com.ffzx.wms.api.dto.Warehouse;
+import com.ffzx.wms.api.service.WarehouseApiService;
+
+public class CommodityMapperTest extends TestBase{
+
+	@Resource
+	private CommodityMapper commodityMapper;
+	
+	@Resource
+	private PurchaseSkuWarningService purchaseSkuWarningService;
+	
+	@Resource
+	private PurchaseSkuWarningApiService purchaseSkuWarningApiService;
+	
+	@Resource
+	private StockDifferenceReplenishService stockDifferenceReplenishService;
+	
+	@Resource
+	private WarehouseApiService warehouseApiService;
+	
+	@Test
+	public void testFindById(){
+		/*Map<String, Object> wmsStockNumOrBuyNumParams = new HashMap<String, Object>();
+		wmsStockNumOrBuyNumParams.put("warehouseCode", "ZXC");
+		wmsStockNumOrBuyNumParams.put("skuCode", "sku9988861064900");
+		wmsStockNumOrBuyNumParams.put("lastPushTime", "2016-07-17 17:50:00");
+		
+		String count = this.commodityMapper.selectBuyNumBySkuCodeAndWarehouse(wmsStockNumOrBuyNumParams);
+		logger.info("====================" +JsonMapper.toJsonString(count));*/
+		
+		PurchaseWarningBean skuWarning = new PurchaseWarningBean();
+		skuWarning.setId("3c96962dcdcd4b9d9216c55f0e1a6d29");
+		skuWarning.setSkuCode("sku1216564588381");
+		skuWarning.setBarcode("6949352206750");
+		skuWarning.setName("雪花清爽9&deg;P啤酒560ml*12");
+		skuWarning.setCategoryId("0a61e21a9fda42ffadf1990fce309af4");
+		skuWarning.setCategoryName("啤酒");
+		skuWarning.setVendorCode("LY21043426300");
+		skuWarning.setVendorName("郑州一乐铭商贸有限公司");
+		skuWarning.setAreaCategory("1");
+		skuWarning.setWarehouse("1");
+		skuWarning.setStockLimit("0");
+
+		
+		skuWarning.setDeliveryCycle("15");
+		skuWarning.setLeadTime("16");
+		skuWarning.setStepOnBatch("15");
+		skuWarning.setMinimumOrderQuantity("17");
+		skuWarning.setRoadCount(null);
+		
+		skuWarning.setWarehousecode(null);
+		skuWarning.setWarehouseName(null);
+		skuWarning.setUnitId("DW030");
+		skuWarning.setUnitName("箱");
+		skuWarning.setSpecification("560ML*12");
+		skuWarning.setCurrStockNum(null);
+		skuWarning.setStockUsedCount("0");
+		//计算推荐采购量
+		int theoryCount= this.purchaseSkuWarningService.calculatePurchaseNmu(skuWarning);
+		//推荐采购量合理性计算（不能低于最小采购量，是采购批量的倍数）
+		int recommendPurchaseNum = this.purchaseSkuWarningService.calculateRecommendPurchaseNum(skuWarning, theoryCount);
+		System.out.println("=========" + recommendPurchaseNum);
+	}
+	
+	@Test
+	public void calculatePurchaseWarning() {
+		//查询中央仓库  传参，对象type传值0，中央仓
+		/*Warehouse warehouse = new Warehouse();
+		warehouse.setType("0");
+		List<Warehouse> dataList = warehouseApiService.getWarehouseDataList(warehouse);
+		if (dataList != null && dataList.size() > 0) {
+			warehouse = dataList.get(0);
+		}*/
+		
+		
+		this.purchaseSkuWarningService.calculatePurchaseWarning("1",false);
+		//this.purchaseSkuWarningApiService.autoCalculatePurchaseWarning();
+	}
+	
+	@Test
+	public void autoPushPurchaseOrderList() {
+		this.purchaseSkuWarningApiService.autoPushPurchaseOrderList();
+	}
+	
+	@Test
+	public void git() {
+		//库存异常处理
+		List<StockDifferenceReplenish> replenishList = 
+				this.stockDifferenceReplenishService.findByCode("abc");
+		for (StockDifferenceReplenish replenish : replenishList) {
+			System.out.println(1);
+		}
+	}
+	
+	@Test
+	public void hh() {
+		try {
+			int day = 0;
+			String firstPayStr = "2016-09-22 20:13:21";
+			if (StringUtil.isNotNull(firstPayStr)) {
+				Date firstPayTime = DateUtil.parseTime(firstPayStr);
+				Date currDate = new Date();
+				currDate = DateUtil.parseTime(DateUtil.formatDate(currDate) + " 18:00:00"); 
+				day = DateUtil.daysBetween(firstPayTime, currDate);
+				int hour = DateUtil.hoursBetween(firstPayTime, currDate);
+				if (hour > 0) {
+					day = day + 1;
+				}
+			}
+			
+			System.out.println(day);
+		} catch (Exception e) {
+			
+		}
+		//this.purchaseSkuWarningService.calculateSaleNotPurchaseDay(bean);
+	}
+	
+	public static void main(String[] args) {
+		try {
+			int day = 0;
+			String firstPayStr = "2016-09-22 20:13:21";
+			if (StringUtil.isNotNull(firstPayStr)) {
+				Date currDate = new Date();
+				Date firstPayDate = DateUtil.parseTime(firstPayStr.substring(0, 10) + " 00:00:00");
+				Date firstPayHour = DateUtil.parseTime(DateUtil.formatDate(currDate) + " " + firstPayStr.substring(11, 19));
+				currDate = DateUtil.parseTime(DateUtil.formatDate(currDate) + " 18:00:00"); 
+				day = DateUtil.daysBetween(firstPayDate, currDate);
+				int hour = DateUtil.hoursBetween(firstPayHour, currDate);
+				if (hour > 0) {
+					day = day + 1;
+				}
+			}
+			
+			System.out.println(day);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}
