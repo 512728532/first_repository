@@ -1,0 +1,91 @@
+package com.huawei.device.review.common.utils;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
+
+public class CreateIndex {
+	public static boolean createDocumentIndex() {
+		boolean bool = false;
+		//被索引的目录文件夹
+		File dirpath = new File("D:\\work\\documentTest");
+		//索引文件存放的目录文件夹
+		File indexpath = new File("D:\\work\\Index");
+		//分词，分词有StandardAnalyzer和SimpleAnalyzer两种   
+		//lucene是将一句句话，一段话Field，分成一个个词Term进行索引搜索的。
+		Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_4_9);
+		IndexWriterConfig iwc = new IndexWriterConfig(
+				Version.LUCENE_4_9, analyzer);
+		
+		try {
+			Directory dir = FSDirectory.open(indexpath);
+			//向E:\\Index保存建立的索引Index内容    
+			//用到IndexWriter类，这里需要传入的三个参数为：    
+			//（索引目录文件夹，分词）
+			IndexWriter writer = new IndexWriter(dir, iwc);
+			File[] txtfiles = dirpath.listFiles();
+			long startTime = new Date().getTime();
+			for (int i = 0; i < txtfiles.length; i++) {
+				if (txtfiles[i].isFile() && txtfiles[i].getName().endsWith(".txt")) {
+					System.out.println("文件" + txtfiles[i].getCanonicalPath() + "正在索引中。。。");
+					
+					FileInputStream fis;
+					try {
+						fis = new FileInputStream(txtfiles[i]);
+					} catch (FileNotFoundException fnfe) {
+						return false;
+					}
+					
+					Document doc = new Document();
+					//Reader read=new FileReader(txtfiles[i]);
+					//doc.add(new TextField("contents", read));
+					doc.add(new  StringField("path",txtfiles[i].getAbsolutePath(),Field.Store.YES));
+					doc.add(new TextField("contents", new BufferedReader(
+							new InputStreamReader(fis, StandardCharsets.UTF_8))));
+					
+					if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
+						System.out.println("adding " + txtfiles[i].getName());
+						writer.addDocument(doc);
+					} else {
+						System.out.println("updating " + txtfiles[i].getName());
+						writer.updateDocument(new Term("path", txtfiles[i].getAbsolutePath()),
+								doc);
+					}
+				}
+			}
+			
+			
+			writer.close();
+			
+			long endTime = new Date().getTime();
+			System.out.println("共花了"+(endTime-startTime)+"毫秒将文档增加到 索引中"+indexpath.getPath());
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return true;
+		
+	}
+	
+	public static void main(String[] args) {
+		createDocumentIndex();
+	}
+}
