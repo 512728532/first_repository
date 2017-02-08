@@ -1,0 +1,33 @@
+package com.huawei.device.review.common.utils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+public class PropertiesUtil {
+	private static Properties properties=null;
+	
+	
+	static{
+		try {
+			properties=new Properties();
+			File file = new File(PropertiesUtil.class.getResource("/").getPath());
+			File[] fs=file.listFiles();
+			for (File f : fs) {
+				System.out.println(f.getName());
+				if(f.isFile()&&f.getName().endsWith("properties")){
+					properties.load(new FileInputStream(f));
+				}
+			}
+			System.out.println("properties初始化。。。。。。。。");
+			System.out.println(properties.get("uploadDir"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static String get(String key){
+		return properties.getProperty(key);
+	}
+}
