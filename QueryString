@@ -1,0 +1,69 @@
+package com.huawei.device.review.common.utils;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
+
+public class QueryString {
+
+	public static void main(String[] args) throws IOException, ParseException {    
+		//想搜索的词    
+		String queryStr="java";    
+		//索引目录    
+		File indexDir=new File("D:\\work\\Index");
+		
+		//创建directory，Index的映射地址，相当于电话本    
+		FSDirectory directory=FSDirectory.open(indexDir);
+		DirectoryReader open = IndexReader.open(directory);
+		IndexSearcher searcher=new IndexSearcher(open);   
+		if(!indexDir.exists()){    
+			System.out.println("索引目录不存在");    
+			return;    
+		}      
+		
+		//1、从Document的”content“中查找关键字，而在此之前文章全部变成小写 toLowerCase（）  
+		Term term=new Term("contents",queryStr.toLowerCase());   
+		//查询命令    
+		TermQuery luceneQuery=new TermQuery(term);   
+		//2、
+		Term pathTerm = new Term("path", "D:\\work\\documentTest\\c.txt");
+		TermQuery pathQuery=new TermQuery(pathTerm);
+		
+		BooleanQuery bQuery = new BooleanQuery();
+		bQuery.add(luceneQuery, BooleanClause.Occur.SHOULD);
+		bQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
+		//3、
+		QueryParser parser = new QueryParser(Version.LUCENE_4_9, "contents", new StandardAnalyzer(Version.LUCENE_4_9));
+		Query query = parser.parse("+(contents:c001 c002) (path:a.txt)");
+		
+		//结果保存在Hits中   
+		TopDocs results = searcher.search(query, 5 * 10);
+	    ScoreDoc[] hits = results.scoreDocs;
+	    
+		for(int j=0;j<hits.length;j++){   
+			Document doc = searcher.doc(hits[j].doc);
+	        String path = doc.get("path");
+	        if (path != null) {
+	          System.out.println((j+1) + ". " + path);
+	        } else {
+	          System.out.println((j+1) + ". " + "No path for this document");
+	        }   
+		}
+	}
+}
